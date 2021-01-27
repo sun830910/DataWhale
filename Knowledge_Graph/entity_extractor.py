@@ -139,7 +139,6 @@ class EntityExtractor:
         sentence = re.sub("[{}]", re.escape(string.punctuation), question)
         sentence = re.sub("[，。‘’；：？、！【】]", " ", sentence)
         sentence = sentence.strip()
-        print(sentence)
 
         # 切词，去停用词与长度小于2的词
         words = [w.strip() for w in jieba.cut(sentence) if w.strip() not in self.stopwords and len(w.strip()) >= 2]
@@ -148,7 +147,6 @@ class EntityExtractor:
 
         for word in words:
             temp = [self.disease_entities, self.alias_entities, self.symptom_entities, self.complication_entities]
-            print(temp)
             for i in range(len(temp)):
                 flag = ''
                 if i == 0:
