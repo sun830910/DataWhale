@@ -29,10 +29,10 @@ class EntityExtractor:
         self.nb_model = joblib.load(self.nb_path)
 
         data_dir = os.path.join(current_dir, 'data/')
-        self.disease_path = data_dir + 'disease_vocab.txt'
-        self.symptom_path = data_dir + 'symptom_vocab.txt'
-        self.alias_path = data_dir + 'alias_vocab.txt'
-        self.complication_path = data_dir + 'complications_vocab.txt'
+        self.disease_path = data_dir + 'disease_vocab.txt'  # 疾病
+        self.symptom_path = data_dir + 'symptom_vocab.txt'  # 症状
+        self.alias_path = data_dir + 'alias_vocab.txt'  # 别称
+        self.complication_path = data_dir + 'complications_vocab.txt'  # 并发症
 
         self.disease_entities = [w.strip() for w in open(self.disease_path, encoding='utf8') if w.strip()]
         self.symptom_entities = [w.strip() for w in open(self.symptom_path, encoding='utf8') if w.strip()]
@@ -69,13 +69,14 @@ class EntityExtractor:
     def build_actree(self, wordlist):
         """
         构造actree，加速过滤
+
         :param wordlist:
         :return:
         """
         actree = ahocorasick.Automaton()
-        # 向树中添加单词
-        for index, word in enumerate(wordlist):
-            actree.add_word(word, (index, word))
+        # 向树中添加新单词
+        for idx, word in enumerate(wordlist):
+            actree.add_word(word, (idx, word))
         actree.make_automaton()
         return actree
 
@@ -86,21 +87,23 @@ class EntityExtractor:
         :return:
         """
         self.result = {}
-
-        for i in self.disease_tree.iter(question):
-            word = i[1][1]
-            if "Disease" not in self.result:
-                self.result["Disease"] = [word]
+        # 抽取问题中的疾病关键词
+        for idx in self.disease_tree.iter(question):
+            word = idx[1][1]  # 取出命中的关键词，idx的格式为(命中关键词在输入的结尾位置，（关键词的索引，关键词）)
+            if "Disease" not in self.result:  # 若结果中尚未出现疾病类关键词，则加入该栏位
+                self.result['Disease'] = [word]
             else:
-                self.result["Disease"].append(word)
+                self.result['Disease'].append(word)
 
-        for i in self.alias_tree.iter(question):
-            word = i[1][1]
+        # 抽取问题中的别称关键词
+        for idx in self.alias_tree.iter(question):
+            word = idx[1][1]
             if "Alias" not in self.result:
                 self.result["Alias"] = [word]
             else:
                 self.result["Alias"].append(word)
 
+        # 抽取问题中的症状关键词
         for i in self.symptom_tree.iter(question):
             wd = i[1][1]
             if "Symptom" not in self.result:
@@ -108,6 +111,7 @@ class EntityExtractor:
             else:
                 self.result["Symptom"].append(wd)
 
+        # 抽取问题中的并发症关键词
         for i in self.complication_tree.iter(question):
             wd = i[1][1]
             if "Complication" not in self.result:
@@ -129,17 +133,21 @@ class EntityExtractor:
 
         jieba.load_userdict(self.vocab_path)
         self.model = KeyedVectors.load_word2vec_format(self.word2vec_path, binary=False)
-
+        print("word2vec model loaded...")
+        # 去除符号、空格
         sentence = re.sub("[{}]", re.escape(string.punctuation), question)
         sentence = re.sub("[，。‘’；：？、！【】]", " ", sentence)
         sentence = sentence.strip()
+        print(sentence)
 
+        # 切词，去停用词与长度小于2的词
         words = [w.strip() for w in jieba.cut(sentence) if w.strip() not in self.stopwords and len(w.strip()) >= 2]
 
         alist = []
 
         for word in words:
             temp = [self.disease_entities, self.alias_entities, self.symptom_entities, self.complication_entities]
+            print(temp)
             for i in range(len(temp)):
                 flag = ''
                 if i == 0:
@@ -219,7 +227,7 @@ class EntityExtractor:
 
     def check_words(self, wds, sent):
         """
-        基于特征词分类
+        基于特征词分类,若wds中的wd在sent中则返回True
         :param wds:
         :param sent:
         :return:
@@ -245,7 +253,7 @@ class EntityExtractor:
 
     def other_features(self, text):
         """
-        提取问题的关键词特征
+        提取问题的关键词特征，计算text中的询问关键词频次以确定询问重点
         :param text:
         :return:
         """
@@ -277,6 +285,7 @@ class EntityExtractor:
             if d in text:
                 features[6] += 1
 
+        # 计算权重
         m = max(features)
         n = min(features)
         normed_features = []
@@ -301,28 +310,27 @@ class EntityExtractor:
 
     # 实体抽取主函数
     def extractor(self, question):
-        self.entity_reg(question)
+        self.entity_reg(question)  # 进行第一次关键词匹配，使用ACTree逐字匹配
         if not self.result:
-            self.find_sim_words(question)
+            self.find_sim_words(question)  # 若匹配不到任何东西，则计算相似词，涉及余弦相似度与编辑距离
 
         types = []  # 实体类型
         for v in self.result.keys():
-            types.append(v)
+            types.append(v)  # 将已经识别出实体的实体类型加入至types中
 
         intentions = []  # 查询意图
 
-        # 意图预测
-        tfidf_feature = self.tfidf_features(question, self.tfidf_model)
-
-        other_feature = self.other_features(question)
+        tfidf_feature = self.tfidf_features(question, self.tfidf_model)  # 计算输入的tfidf特征(1,830)
+        other_feature = self.other_features(question)  # 计算询问关键词频次特征(7,)
         m = other_feature.shape
-        other_feature = np.reshape(other_feature, (1, m[0]))
+        other_feature = np.reshape(other_feature, (1, m[0]))  # 将一维序列转为二维矩阵,(1,7)
 
-        feature = np.concatenate((tfidf_feature, other_feature), axis=1)
+        feature = np.concatenate((tfidf_feature, other_feature), axis=1)  # 将两个特征的二维矩阵合并，形成一(1,837)矩阵
 
-        predicted = self.model_predict(feature, self.nb_model)
-        intentions.append(predicted[0])
+        predicted = self.model_predict(feature, self.nb_model)  # 取得询问意图结果，如['query_department']
+        intentions.append(predicted[0])  # 添加询问意图类型至intentions
 
+        # 预设询问句式，添加打中的意图至intentions中
         # 已知疾病，查询症状
         if self.check_words(self.symptom_qwds, question) and ('Disease' in types or 'Alia' in types):
             intention = "query_symptom"
@@ -378,13 +386,12 @@ class EntityExtractor:
             if intention not in intentions:
                 intentions.append(intention)
 
-        self.result["intentions"] = intentions
-
+        self.result["intentions"] = intentions  # 最终总结意图
         return self.result
 
 
 if __name__ == '__main__':
     test = EntityExtractor()
-    while True:
-        question = str(input("输入："))
-        print(test.extractor(question))
+
+    question = "产后三急属于什么科啊 不帮我"
+    print(test.extractor(question))
