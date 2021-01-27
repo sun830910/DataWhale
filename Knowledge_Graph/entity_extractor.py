@@ -132,6 +132,7 @@ class EntityExtractor:
         from gensim.models import KeyedVectors
 
         jieba.load_userdict(self.vocab_path)
+        print("初步匹配失败，触发模型相似度匹配模块，模型加载中请稍后...")
         self.model = KeyedVectors.load_word2vec_format(self.word2vec_path, binary=False)
         print("word2vec model loaded...")
         # 去除符号、空格
