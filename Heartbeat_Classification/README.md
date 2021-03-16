@@ -14,3 +14,68 @@ Datawhale与天池联合发起的零基础入门系列赛事第五场 —— 零
 
 ## 数据概况
 
+train.csv
+
+- id 为心跳信号分配的唯一标识
+- heartbeat_signals 心跳信号序列(数据之间采用“,”进行分隔)
+- label 心跳信号类别（0、1、2、3）
+
+testA.csv
+
+- id 心跳信号分配的唯一标识
+- heartbeat_signals 心跳信号序列(数据之间采用“,”进行分隔)
+
+## 预测指标
+
+选手需提交4种不同心跳信号预测的概率，选手提交结果与实际心跳类型结果进行对比，求预测的概率与真实值差值的绝对值。
+
+具体计算公式如下：
+
+总共有n个病例，针对某一个信号，若真实值为[y1,y2,y3,y4],模型预测概率值为[a1,a2,a3,a4],那么该模型的评价指标abs-sum为 $$ {abs-sum={\mathop{ \sum }\limits_{{j=1}}^{{n}}{{\mathop{ \sum }\limits_{{i=1}}^{{4}}{{ \left| {y\mathop{{}}\nolimits_{{i}}-a\mathop{{}}\nolimits_{{i}}} \right| }}}}}} $$ 例如，某心跳信号类别为1，通过编码转成[0,1,0,0]，预测不同心跳信号概率为[0.1,0.7,0.1,0.1]，那么这个信号预测结果的abs-sum为 $$ {abs-sum={ \left| {0.1-0} \right| }+{ \left| {0.7-1} \right| }+{ \left| {0.1-0} \right| }+{ \left| {0.1-0} \right| }=0.6} $$
+
+多分类算法常见的评估指标如下：
+
+其实多分类的评价指标的计算方式与二分类完全一样，只不过我们计算的是针对于每一类来说的召回率、精确度、准确率和 F1分数。
+
+1、混淆矩阵（Confuse Matrix）
+
+- （1）若一个实例是正类，并且被预测为正类，即为真正类TP(True Positive )
+- （2）若一个实例是正类，但是被预测为负类，即为假负类FN(False Negative )
+- （3）若一个实例是负类，但是被预测为正类，即为假正类FP(False Positive )
+- （4）若一个实例是负类，并且被预测为负类，即为真负类TN(True Negative ）
+
+第一个字母T/F，表示预测的正确与否；第二个字母P/N，表示预测的结果为正例或者负例。如TP就表示预测对了，预测的结果是正例，那它的意思就是把正例预测为了正例。  
+
+2.准确率（Accuracy） 准确率是常用的一个评价指标，但是不适合样本不均衡的情况，医疗数据大部分都是样本不均衡数据。 $$ Accuracy=\frac{Correct}{Total}\ Accuracy = \frac{TP + TN}{TP + TN + FP + FN} $$   
+
+3、精确率（Precision）也叫查准率简写为P
+
+**精确率(Precision)\**是针对预测结果而言的，其含义是\**在被所有预测为正的样本中实际为正样本的概率**在被所有预测为正的样本中实际为正样本的概率，精确率和准确率看上去有些类似，但是是两个完全不同的概念。精确率代表对正样本结果中的预测准确程度，准确率则代表整体的预测准确程度，包括正样本和负样本。 $$ Precision = \frac{TP}{TP + FP} $$   
+
+4.召回率（Recall） 也叫查全率 简写为R
+
+**召回率(Recall)\**是针对原样本而言的，其含义是\**在实际为正的样本中被预测为正样本的概率**。 $$ Recall = \frac{TP}{TP + FN} $$
+
+下面我们通过一个简单例子来看看精确率和召回率。假设一共有10篇文章，里面4篇是你要找的。根据你的算法模型，你找到了5篇，但实际上在这5篇之中，只有3篇是你真正要找的。
+
+那么算法的精确率是3/5=60%，也就是你找的这5篇，有3篇是真正对的。算法的召回率是3/4=75%，也就是需要找的4篇文章，你找到了其中三篇。以精确率还是以召回率作为评价指标，需要根据具体问题而定。
+
+5.宏查准率（macro-P）
+
+计算每个样本的精确率然后求平均值 $$ {macroP=\frac{{1}}{{n}}{\mathop{ \sum }\limits_{{1}}^{{n}}{p\mathop{{}}\nolimits_{{i}}}}} $$   
+
+6.宏查全率（macro-R）计算每个样本的召回率然后求平均值 $$ {macroR=\frac{{1}}{{n}}{\mathop{ \sum }\limits_{{1}}^{{n}}{R\mathop{{}}\nolimits_{{i}}}}} $$    
+
+7.宏F1（macro-F1） $$ {macroF1=\frac{{2 \times macroP \times macroR}}{{macroP+macroR}}} $$ 与上面的宏不同，微查准查全，先将多个混淆矩阵的TP,FP,TN,FN对应位置求平均，然后按照P和R的公式求得micro-P和micro-R，最后根据micro-P和micro-R求得micro-F1  
+
+8.微查准率（micro-P） $$ {microP=\frac{{\overline{TP}}}{{\overline{TP} \times \overline{FP}}}} $$   
+
+9.微查全率（micro-R） $$ {microR=\frac{{\overline{TP}}}{{\overline{TP} \times \overline{FN}}}} $$   
+
+10.微F1（micro-F1） $$ {microF1=\frac{{2 \times microP\times microR }}{{microP+microR}}} $$
+
+## 赛题分析
+
+- 本题为传统的数据挖掘问题，通过数据科学以及机器学习深度学习的办法来进行建模得到结果。
+- 本题为典型的多分类问题，心跳信号一共有4个不同的类别
+- 主要应用xgb、lgb、catboost，以及pandas、numpy、matplotlib、seabon、sklearn、keras等等数据挖掘常用库或者框架来进行数据挖掘任务。
