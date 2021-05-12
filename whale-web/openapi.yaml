@@ -1,16 +1,16 @@
 openapi: 3.0.3
 info:
   title: Bluewhale
-  description: 'This is API specifications for bluewhale site'
+  description: This is API specifications for bluewhale site
   version: 1.0.0
 servers:
-  - url: http://127.0.0.1:4010
+  - url: http://127.0.0.1:4010/
 paths:
-  "/api/v1/me":
+  /api/v1/me:
     get:
       summary: get current user's profile
       responses:
-        '200':
+        "200":
           description: current user
           content:
             application/json:
@@ -18,24 +18,20 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: "#/components/schemas/User"
+                    $ref: '#/components/schemas/User'
                   code:
                     type: integer
-  "/api/v1/login":
-    options:
-      summary: get csrf token
-      responses:
-        '200':
-          description: options
+
+  /api/v1/login:
     post:
       summary: login
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LoginForm"
+              $ref: '#/components/schemas/LoginForm'
       responses:
-        '200':
+        "200":
           description: success login
           content:
             application/json:
@@ -43,25 +39,32 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: "#/components/schemas/User"
+                    $ref: '#/components/schemas/User'
                   code:
                     type: integer
-  "/api/v1/logout":
+    options:
+      summary: get csrf token
+      responses:
+        "200":
+          description: options
+
+  /api/v1/logout:
     post:
       summary: logout
       responses:
-        '200':
+        "200":
           description: success logout
-  "/api/v1/send-verification":
+
+  /api/v1/send-verification:
     post:
       summary: send verification mail
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SendVerificationForm"
+              $ref: '#/components/schemas/SendVerificationForm'
       responses:
-        '200':
+        "200":
           description: success logout
           content:
             application/json:
@@ -72,9 +75,150 @@ paths:
                     type: integer
                   code:
                     type: integer
+
+  /api/v1/verify/{token}:
+    get:
+      summary: verify verification token
+      parameters:
+        - name: token
+          description: token of user
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: validate ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SendVerificationForm'
+                  code:
+                    type: integer
+        400:
+          description: validate failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+
+  /api/v1/articles/{articleid}:
+    get:
+      summary: get article detail
+      parameters:
+        - name: articleid
+          description: id of article
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: get article sucess
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Article'
+                  code:
+                    type: integer
+        400:
+          description: article no exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+
+  /api/v1/articles:
+    post:
+      summary: create a new article
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleForm'
+        required: true
+      responses:
+        '201':
+          description: create account success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Article"
+                  code:
+                    type: integer
+
+  /api/v1/register:
+    post:
+      summary: create a new account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginForm'
+      responses:
+        '201':
+          description: create account success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+                  code:
+                    type: integer
+        '409':
+          description: Email has been registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommonResponse"
+
+
+
 components:
   schemas:
-    CommonResponse: # common response which has data and code properties
+    ArticleForm:
+      type: object
+      properties:
+        title:
+          type: string
+          maximum: 64
+        content:
+          type: string
+    Article:
+      type: object
+      properties:
+        id:
+          type: string
+          maximum: 36
+        title:
+          type: string
+          maximum: 64
+        content:
+          type: string
+        create_at:
+          type: string
+          format: date-time
+        updateed_at:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        author_id:
+          type: integer
+          format: int64
+          minimum: 1
+    CommonResponse:
       type: object
       properties:
         data:
@@ -100,9 +244,9 @@ components:
       type: object
       properties:
         id:
+          minimum: 1
           type: integer
           format: int64
-          minimum: 1
         email:
           type: string
           format: email
@@ -124,13 +268,13 @@ components:
         groups:
           type: array
           items:
-            $ref: "#/components/schemas/Group"
+            $ref: '#/components/schemas/Group'
     Group:
       type: object
       properties:
         id:
+          minimum: 1
           type: integer
           format: int64
-          minimum: 1
         name:
           type: string
