@@ -1,12 +1,12 @@
 <template>
   <div>
-    Subscribes
+    榜单
   </div>
 </template>
 
 <script>
 
 export default {
-  name: 'Subscribes',
+  name: 'Rank',
 };
 </script>

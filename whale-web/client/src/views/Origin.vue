@@ -1,12 +1,12 @@
 <template>
   <div>
-    QA
+    领域
   </div>
 </template>
 
 <script>
 
 export default {
-  name: 'QA',
+  name: 'Origin',
 };
 </script>

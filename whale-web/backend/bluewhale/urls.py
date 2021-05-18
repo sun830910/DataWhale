@@ -30,12 +30,12 @@ router = routers.DefaultRouter()
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path(f'{api_prefix}/login', BluewhaleLoginView.as_view(), name='rest_login'),
+    path(f'{api_prefix}/login', BluewhaleLoginView.as_view(), name='rest_login'),   #登陆
     path(f'{api_prefix}/logout', LogoutView.as_view(), name='rest_logout'),
     path(f'{api_prefix}/send-verification', send_verification_mail, name='send verification mail'),
     path(f'{api_prefix}/verify/<token>', verify_verification_token, name='verify verification token'),
     path(f'{api_prefix}/register', register, name='register'),
-    path(f'{api_prefix}/me', get_user_info, name='user profile'),
+    path(f'{api_prefix}/me', get_user_info, name='user profile'),   # 获得用户信息
 
     path(f'{api_prefix}/articles', ArticleListCreateView.as_view(), name='articles'),
     path(f'{api_prefix}/articles/<pk>', ArticleDetailView.as_view(), name='article'),

@@ -8,18 +8,39 @@
           src="../assets/bluewhale.png"
           max-height="48"
         />
+
+      <v-btn plain to="/home">
+         <v-icon>mdi-home</v-icon>
+        首页
+      </v-btn>  
       <v-btn plain to="/articles">
-        <v-icon>mdi-newspaper-variant-multiple</v-icon>
-        最新
+      <!-- todo：为什么不选中，图标依然亮着？ -->
+        <v-icon>mdi-book-open-variant</v-icon>
+        文章
       </v-btn>
-      <v-btn plain to="/qa">
+      <!-- to do：这个其实是撰写文章 -->
+      <v-btn plain to="/origin">
+        <v-icon>mdi-account-supervisor-circle</v-icon>
+        领域
+      </v-btn>
+      <v-btn plain to="/chat">
+        <v-icon>mdi-chat-processing</v-icon>
+        交流
+      </v-btn>
+      <v-btn plain to="/rank">
+        <v-icon>mdi-clipboard-list</v-icon>
+        榜单
+      </v-btn>
+
+      <!-- 以下两个可删除 -->
+      <!-- <v-btn plain to="/qa">
         <v-icon>mdi-frequently-asked-questions</v-icon>
         问答
       </v-btn>
       <v-btn plain to="/subscribes">
         <v-icon>mdi-table-heart</v-icon>
         关注
-      </v-btn>
+      </v-btn> -->
       <v-spacer></v-spacer>
       <v-btn icon to="/articles/editor/add" v-show="isAuthenticated">
         <v-icon>mdi-book-plus</v-icon>
@@ -38,6 +59,7 @@
           <v-avatar
             v-bind="attrs"
             v-on="on">
+            <!-- 这个头像无法正确显示 -->
             <img v-if="isAuthenticated"
               :src="gravatar"
             >
@@ -55,12 +77,31 @@
               Login
             </v-list-item-content>
           </v-list-item>
+          <!-- todo：需要竖着排列 -->
           <v-list-item v-else @click="signOutUser">
+            <v-list-item-icon>
+              <v-icon>mdi-account-circle</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              个人主页
+            </v-list-item-content>
+            <v-list-item-icon>
+              <v-icon>mdi-account-settings</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              人员管理
+            </v-list-item-content>
+            <v-list-item-icon>
+              <v-icon>mdi-account-settings</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              设置
+            </v-list-item-content>
             <v-list-item-icon>
               <v-icon>mdi-logout</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
-              Logout
+              注销登陆
             </v-list-item-content>
           </v-list-item>
         </v-list>

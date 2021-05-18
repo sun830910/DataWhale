@@ -31,4 +31,5 @@ class UserSerializer(serializers.ModelSerializer):
             'last_login_ip',
             'description',
             'groups',
+            'school',
         )

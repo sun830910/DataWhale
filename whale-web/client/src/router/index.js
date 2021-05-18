@@ -9,8 +9,19 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Layout,
-    redirect: '/articles',
+    redirect: '/home',
     children: [
+      {
+        path: 'home',
+        name: 'home',
+        component: () => import('../views/Home.vue'),
+      },
+      {
+        path: 'origin',
+        name: 'origin',
+        // articles/editor/add
+        component: () => import('../views/Origin.vue'),
+      },
       {
         path: 'articles',
         name: 'articles',
@@ -32,14 +43,14 @@ const routes = [
         ],
       },
       {
-        path: 'qa',
-        name: 'qa',
-        component: () => import('../views/QA.vue'),
+        path: 'chat',
+        name: 'chat',
+        component: () => import('../views/Chat.vue'),
       },
       {
-        path: 'subscribes',
-        name: 'subscribes',
-        component: () => import('../views/Subscribes.vue'),
+        path: 'rank',
+        name: 'rank',
+        component: () => import('../views/Rank.vue'),
       },
       {
         path: 'login',

@@ -132,7 +132,7 @@ export default {
         password: this.password,
       }).then((data) => {
         this.setUserInfo(data.data);
-        this.$router.push({ name: 'articles' });
+        this.$router.push({ name: 'home' });
       }).catch(() => {
         this.showSnack({
           text: 'Failed to sign in, please check your credentials.',

@@ -23,6 +23,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     description = models.TextField(_('description'), blank=True)
     last_login_ip = models.CharField(_('last login ip'), max_length=64, blank=True)
 
+    school = models.CharField(_('school'), max_length=64, blank=True)
+    
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
